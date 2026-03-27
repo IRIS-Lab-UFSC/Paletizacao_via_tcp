@@ -1,0 +1,57 @@
+import socket
+
+ROBOT_IP="192.168.0.10"
+PORT=30002
+PORT_CMD=5000
+file_name="palete_tcp.script"
+
+tcp_socket= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+tcp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+tcp_socket.connect((ROBOT_IP, PORT))
+
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server.bind(("0.0.0.0", PORT_CMD))
+server.listen(1)
+
+
+try:
+    with open(file_name) as f:
+        script=f.read()
+except FileNotFoundError:
+    print("Arquivo não encontrado")
+except IOError:
+    print("Não foi possível abrir o arquivo")
+
+
+tcp_socket.sendall(script.encode("utf-8"))
+print("Aguardando conexão do robô...")
+conn, addr = server.accept()
+print("Conectado:", addr)
+
+def receber_comando():
+    data=conn.recv(1024)
+    print(f"Mensagem do Robô: {data.decode('utf-8').strip()}")
+
+def enviar_comando():
+    while True:
+        cmd=input("Digite aqui um comando, STOP, PAUSE, RESTART, MOVE, SAIR: ").upper()
+        if cmd=="SAIR": break
+        conn.sendall((cmd+"\n").encode('utf-8'))
+        if cmd=="MOVE":
+            receber_comando()
+            cmd=input("ponto:")
+            conn.sendall((cmd+"\n").encode('utf-8'))
+            receber_comando()
+
+
+
+try:
+    enviar_comando()
+finally:
+    conn.shutdown(socket.SHUT_RDWR)
+    conn.close()
+    server.close()
+    tcp_socket.shutdown(socket.SHUT_RDWR)
+    tcp_socket.close()
+    print("Portas liberadas")

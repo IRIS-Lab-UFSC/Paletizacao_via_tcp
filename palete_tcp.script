@@ -1,0 +1,84 @@
+def paletizacao():
+  set_gravity([0.0, 0.0, 9.82])
+  set_tcp(p[0.0,0.0,0.0,0.0,0.0,0.0])
+  set_payload(0.1)
+  rows=3
+  colums=2
+  cnt_1=0
+  c1 = p[.804109512728, -.170646607479, .001638944400, -.720057501453, 2.949641876232, .016773383741]
+  c2 = p[.788847592809, .431490695657, -.004090053171, -1.681550245638, 2.534192813452, .071248209323]
+  c4 = p[.613991377242, -.190147441552, -.011940742562, .669591805873, -2.982470237662, -.098628000846]
+  c3 = p[.581129059686, .434567715694, .007032847265, 1.970629842011, -2.444873395160, -.063563397096]
+  socket_open("192.168.0.102",5000,"pc")
+  
+ 
+  thread espera_comando():
+    while (True):
+      cmd=socket_read_line("pc", timeout=0.5)
+      
+      if cmd=="STOP":
+        popup("Emergency stop command received")
+        halt
+      elif cmd=="PAUSE":
+        popup("The program has been paused")
+        pause
+      elif cmd=="MOVE":
+        socket_send_line("Digite as seis coordenadas do ponto em parenteses():", "pc")
+        crd=socket_read_ascii_float(6, "pc", timeout=100)
+        point=p[crd[1],crd[2],crd[3],crd[4], crd[5], crd[6]]
+        socket_send_line(point,"pc")
+
+      end
+      
+      sync()
+    end
+  end
+
+  run espera_comando()
+  
+  while (True):
+
+   
+
+    movej(get_inverse_kin(p[.623815050173, -.584273837099, .136894863163, .099576979158, 3.028506346375, -.049559399784], qnear=[-0.5643013159381312, -2.146048370991842, -1.8368824164019983, -0.6162107626544397, 1.5955325365066528, 1.0737292766571045]), a=1.3962634015954636, v=1.0471975511965976)
+
+    
+
+    movep(p[.623795854930, -.584348363161, .047775662215, .099618628210, 3.028388151206, -.049569864244], a=1.2, v=0.25, r=0.025)
+    
+   
+    set_standard_digital_out(1, True)
+    sleep(2.0)
+    
+    dy=(c2[1]-c1[1])/(rows-1)
+    dx=(c4[0]-c1[0])/(colums-1)
+
+    cont_y= cnt_1%rows
+    cont_x= floor(cnt_1/rows)
+
+    delta=p[cont_x*dx, cont_y*dy,0,0,0,0]
+    pattern_point=p[c1[0]+delta[0], c1[1]+delta[1], c1[2], c1[3], c1[4], c1[5]]
+
+    deslocamento=p[0.1,0.1,-0.1,0,0,0]
+
+    movel(pose_trans(pattern_point, deslocamento), a=1.2, v=0.25)
+    
+
+  
+    movel(pattern_point, a=1.2, v=0.25)
+
+    set_standard_digital_out(0, False)
+
+    sleep(2.0)
+  
+    movel(pose_trans(pattern_point, deslocamento), a=1.2, v=0.25)
+
+    if (cnt_1 >= 5):
+        cnt_1 = 0
+    else:
+        cnt_1 = cnt_1 + 1
+    end
+  end
+      
+end
+paletizacao()
