@@ -1,9 +1,10 @@
 import socket
+import threading
 
 ROBOT_IP="192.168.0.10"
 PORT=30002
 PORT_CMD=5000
-file_name="palete_tcp.script"
+file_name="palete_tcp2.script"
 
 tcp_socket= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 tcp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -30,8 +31,13 @@ conn, addr = server.accept()
 print("Conectado:", addr)
 
 def receber_comando():
-    data=conn.recv(1024)
-    print(f"Mensagem do Robô: {data.decode('utf-8').strip()}")
+    while True:
+        data=conn.recv(1024)
+        if not data:
+            break
+
+        print(f"Mensagem do Robô: {data.decode('utf-8').strip()}")
+
 
 def enviar_comando():
     while True:
@@ -39,14 +45,21 @@ def enviar_comando():
         if cmd=="SAIR": break
         conn.sendall((cmd+"\n").encode('utf-8'))
         if cmd=="MOVE":
-            receber_comando()
             cmd=input("ponto:")
             conn.sendall((cmd+"\n").encode('utf-8'))
-            receber_comando()
+           
+            
+def start_program():
+    prompt="""Vamos começar o programa! \n
+    Digite FIXO para usar os pontos setados ou alterar para mudar a paletização:\n"""
+    cmd=input(prompt).upper()
+    conn.sendall((cmd+"\n").encode('utf-8'))
 
-
+thread=threading.Thread(target=receber_comando,daemon=True)
+thread.start()
 
 try:
+    start_program()
     enviar_comando()
 finally:
     conn.shutdown(socket.SHUT_RDWR)
