@@ -4,7 +4,7 @@ import threading
 ROBOT_IP="192.168.0.10"
 PORT=30002
 PORT_CMD=5000
-file_name="palete_tcp2.script"
+file_name="palete_tcp.script"
 
 tcp_socket= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 tcp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
