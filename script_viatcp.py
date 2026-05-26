@@ -58,6 +58,8 @@ def start_program():
     conn.sendall((cmd).encode('utf-8'))
     cmd=input("Digite um vetor com o tamanho das caixas para a paletização\n")
     conn.sendall((cmd).encode('utf-8'))
+    cmd=input("Digite um vetor com as rotações das caixas de acordo com o padrão que quer\n")
+    conn.sendall((cmd).encode('utf-8'))
     cmd=input("Digite FIXO para usar os pontos setados ou alterar para mudar a paletização:\n").upper()
     conn.sendall((cmd+"\n").encode('utf-8'))
 
