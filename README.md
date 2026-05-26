@@ -11,3 +11,4 @@ Modo FIXO: Utiliza coordenadas pré-configuradas no código.Modo ALTERAR: Permit
 * Monitoramento de Performance: Threads dedicadas contam os ciclos de clock do controlador para calcular o tempo exato de cada ciclo e de cada caixa individualmente em segundos.
 * Controle Remoto via Terminal: Envio de comandos em tempo real como interrupção de emergência ou movimentação manual para pontos específicos.
 * Blend entre os movimentos do robô
+* Mudar a orientação das caixas em cada camada 
