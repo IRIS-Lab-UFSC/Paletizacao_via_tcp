@@ -36,30 +36,35 @@ def receber_comando():
         if not data:
             break
 
-        print(f"Mensagem do Robô: {data.decode('utf-8').strip()}")
+        print(f"Mensagem do Robô: {data.decode('utf-8').strip()}\n")
 
 
 def enviar_comando():
     while True:
-        cmd=input("Digite aqui um comando, STOP, PAUSE, RESTART, MOVE, SAIR: ").upper()
+        cmd=input("Digite aqui um comando, STOP, PAUSE, SAIR: \n").upper()
         if cmd=="SAIR": break
         conn.sendall((cmd+"\n").encode('utf-8'))
-        if cmd=="MOVE":
-            cmd=input("ponto:")
-            conn.sendall((cmd+"\n").encode('utf-8'))
+
            
             
 def start_program():
     prompt="""Vamos começar o programa! \n
-        Escolha a velocidade e aceleração da operação, nesta ordem\n"""
+        Escolha a velocidade, a aceleração e o blend da operação, nesta ordem\n"""
     cmd=input(prompt)
-    conn.sendall((cmd).encode('utf-8'))
-    cmd=input("Digite a quantidade de layers para a paletização\n")
-    conn.sendall((cmd).encode('utf-8'))
+    conn.sendall(("("+cmd+")").encode('utf-8'))
+
+    cmd=input("Digite a quantidade de layers, número de linhas e colunas\n")
+    conn.sendall(("("+cmd+")").encode('utf-8'))
+
+    cmd=input("Digite a altura de aproximação/retração\n")
+    conn.sendall(("("+cmd+")").encode('utf-8'))
+
     cmd=input("Digite um vetor com o tamanho das caixas para a paletização\n")
-    conn.sendall((cmd).encode('utf-8'))
-    cmd=input("Digite um vetor com as rotações das caixas de acordo com o padrão que quer\n")
-    conn.sendall((cmd).encode('utf-8'))
+    conn.sendall(("("+cmd+")").encode('utf-8'))
+
+    cmd=input("Digite um vetor com as orientações das caixas de acordo com o padrão que quer\n")
+    conn.sendall(("("+cmd+")").encode('utf-8'))
+
     cmd=input("Digite FIXO para usar os pontos setados ou alterar para mudar a paletização:\n").upper()
     conn.sendall((cmd+"\n").encode('utf-8'))
 
