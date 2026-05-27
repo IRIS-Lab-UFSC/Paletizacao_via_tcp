@@ -6,20 +6,23 @@ def paletizacao():
   timer_caixa=False
   n_ciclos_total=0
   n_ciclos_caixa=0
-  rows=3
-  colums=2
   cnt_1=0
   start=False
   socket_open("192.168.0.100",5000,"pc")
 
-  movm=socket_read_ascii_float(2, "pc", timeout=300)
+  movm=socket_read_ascii_float(3, "pc", timeout=300)
   vel = movm[1]
   acel = movm[2]
+  blend= movm[3]
 
-  layers=socket_read_ascii_float(1, "pc", timeout=300)
+  layers=socket_read_ascii_float(3, "pc", timeout=300)
   qtd_layers=layers[1]
+  rows=layers[2]
+  colums=layers[3]
 
-  
+  aprox_z = socket_read_ascii_float(1, "pc", timeout=300)
+
+
   alturas = socket_read_ascii_float(qtd_layers, "pc", timeout=300)
   rotacao = socket_read_ascii_float(qtd_layers, "pc", timeout=300)
   
@@ -75,11 +78,6 @@ def paletizacao():
       elif cmd=="PAUSE":
         popup("The program has been paused")
         pause
-      elif cmd=="MOVE":
-        socket_send_line("Digite as seis coordenadas do ponto em parenteses():", "pc")
-        crd=socket_read_ascii_float(6, "pc", timeout=100)
-        point=p[crd[1],crd[2],crd[3],crd[4], crd[5], crd[6]]
-        socket_send_line(point,"pc")
 
       end
       
@@ -89,6 +87,8 @@ def paletizacao():
   run espera_comando()
 
   layer_atual=0
+  x=0.1
+  y=0.1
 
   while (start and (layer_atual<qtd_layers)):
     altura_z=0
@@ -97,7 +97,7 @@ def paletizacao():
     n_ciclos_caixa=0
 
 
-    movej(get_inverse_kin(p[.623815050173, -.584273837099, .136894863163, .099576979158, 3.028506346375, -.049559399784], qnear=[-0.5643013159381312, -2.146048370991842, -1.8368824164019983, -0.6162107626544397, 1.5955325365066528, 1.0737292766571045]), a=0.5, v=0.6,r=0.055)
+    movej(get_inverse_kin(p[.623815050173, -.584273837099, .136894863163, .099576979158, 3.028506346375, -.049559399784], qnear=[-0.5643013159381312, -2.146048370991842, -1.8368824164019983, -0.6162107626544397, 1.5955325365066528, 1.0737292766571045]), a=0.5, v=0.6,r=blend)
 
     movep(p[.623795854930, -.584348363161, .047775662215, .099618628210, 3.028388151206, -.049569864244], a=0.1, v=0.15)
     
@@ -127,11 +127,17 @@ def paletizacao():
     eixo_z=p[0,0,-altura_z,0,0,rotacao[layer_atual]]
     pattern_point=pose_trans(pattern_point, eixo_z)
 
-    deslocamento=p[0.1,0.1,-0.1,0,0,0]
+    if ((cont_x % 2) == 0):
+      y=0.1
+    else:
+      y= -0.1
+    end
+
+    deslocamento=p[x,y,-aprox_z[1],0,0,0]
 
     timer_caixa=True
   
-    movel(pose_trans(pattern_point, deslocamento), a=acel, v=vel)
+    movel(pose_trans(pattern_point, deslocamento), a=acel, v=vel, r=blend)
   
     movel(pattern_point, a=acel, v=vel)
 
@@ -139,7 +145,7 @@ def paletizacao():
 
     sleep(2.0)
     timer_caixa=False
-    movel(pose_trans(pattern_point, deslocamento), a=acel, v=vel)
+    movel(pose_trans(pattern_point, deslocamento), a=acel, v=vel, r=blend)
     timer_total=False
     
     ciclo_total=n_ciclos_total*get_steptime()
@@ -151,7 +157,7 @@ def paletizacao():
     socket_send_line(msg2,"pc")
 
 
-    if (cnt_1 >= 5):
+    if (cnt_1 >= (rows*colums - 1)):
       cnt_1 = 0
       layer_atual=layer_atual+ 1
     else:
