@@ -48,8 +48,8 @@ def enviar_comando():
            
             
 def start_program():
-    prompt="""Vamos começar o programa! \n
-        Escolha a velocidade, a aceleração e o blend da operação, nesta ordem\n"""
+    prompt="""Vamos começar o programa! Escolha a velocidade, a aceleração e o blend da operação, nesta ordem\n
+    Exemplo de input para o programa: 0.5,0.5,0.05 -- sempre entre vírgulas e números com ponto"""
     cmd=input(prompt)
     conn.sendall(("("+cmd+")").encode('utf-8'))
 
